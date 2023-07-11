@@ -25,5 +25,3 @@ Final Project for the UPC Artificial Intelligence with Deep Learning Postgraduat
 * [Future Work](#future_work)
 * [Bibliography](#bibliography)
 
-
-Changes
