@@ -3,14 +3,7 @@ import numpy as np
 from tqdm import tqdm
 import torch.utils.data
 import scipy.sparse as sp
-
-def build_adj_mx(dims, interactions):
-    train_mat = sp.dok_matrix((dims, dims), dtype=np.float32)
-    for x in tqdm(interactions, desc="BUILDING ADJACENCY MATRIX..."):
-        train_mat[x[0], x[1]] = 1.0
-        train_mat[x[1], x[0]] = 1.0
-
-    return train_mat
+from utils import Utils
 
 #Building and preparing dataset
 class Netflix1MDataset(torch.utils.data.Dataset):
@@ -30,7 +23,7 @@ class Netflix1MDataset(torch.utils.data.Dataset):
         # Save dimensions of max users and items and build training matrix
         self.field_dims = np.max(self.items, axis=0) + 1 # ([ 7795, 10295+7795])
         ######################################################## OPTIONAL
-        self.train_mat = build_adj_mx(self.field_dims[-1], self.items.copy())
+        self.train_mat = Utils.build_adj_mx(self.field_dims[-1], self.items.copy())
 
         # Generate train interactions with 4 negative samples for each positive
         self.negative_sampling(num_negatives=num_negatives_train)

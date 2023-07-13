@@ -1,5 +1,6 @@
 import torch.utils.data
 from utils import FeaturesLinear, FM_operation
+import random
 
 class FactorizationMachineModel(torch.nn.Module):
     """
@@ -35,3 +36,72 @@ class FactorizationMachineModel(torch.nn.Module):
         test_interactions = torch.from_numpy(interactions).to(dtype=torch.long, device=device)
         output_scores = self.forward(test_interactions)
         return output_scores
+    
+    
+class RandomModel(torch.nn.Module):
+    def __init__(self, dims):
+        super(RandomModel, self).__init__()
+        """
+        Simple random based recommender system
+        """
+        self.all_items = list(range(dims[0], dims[1]))
+
+    def forward(self):
+        pass
+
+    def predict(self, interactions, device=None):
+         # Asegurarse de que el tamaño del muestreo no sea mayor que el tamaño de self.all_items
+        sample_size = min(len(interactions), len(self.all_items))
+        return torch.FloatTensor(random.sample(self.all_items, sample_size))
+        #return torch.FloatTensor(random.sample(self.all_items, len(interactions)))
+
+
+class PopularityModel:
+    def __init__(self, num_items,topk):
+        self.num_items = num_items
+        self.item_popularity = None
+        self.topk = topk
+
+    def forward(self):
+        pass
+
+    def fit(self, interactions):
+        """
+        Ajusta el modelo de popularidad utilizando las interacciones de los usuarios.
+        """
+        # Calcula la popularidad de los elementos basándose en el recuento de interacciones
+        movieid_column = interactions[:, 1]
+        rating_column = interactions[:, 2]
+        # Crear una máscara booleana para identificar los elementos con rating igual a 1
+        mask = rating_column == 1
+        # Filtrar los movieid correspondientes a los elementos con rating igual a 1
+        rated_movieids = movieid_column[mask]
+        # Obtener los items únicos con rating igual a 1
+        unique_rated_movieids, counts = np.unique(rated_movieids, return_counts=True)
+        #print(unique_rated_movieids)
+        # Normaliza la popularidad para obtener una distribución de probabilidad
+        n_interactions = len(interactions)
+        self.item_popularity =  counts / n_interactions
+        #print(n_interactions)
+        #print("movieID:",unique_rated_movieids,"counts:", counts, "popularity:" ,self.item_popularity)
+        ranked_list = []
+        for i in range(len(unique_rated_movieids)):
+            columna1 = unique_rated_movieids[i]
+            columna2 = self.item_popularity[i]
+            ranked_list.append([columna1, columna2])
+        ranked_sorted = sorted(ranked_list, key=lambda x: x[1], reverse=True)
+        #print(len(ranked_sorted)) # aquelles pelicules q tenen alguna interaccio
+        #com sé si l'usuari ja ha vist alguna de les pelis de la llista?
+        return ranked_sorted
+
+    def predict(self, ranked_sorted1, interactions, userID):
+        #if user-item-interaction = 1 descarta'l del ranking
+        # Obtener los movieID con interacción igual a 1
+        movieID_interaccion_1 = interactions[((interactions[:, 2] == 1) & (interactions[:,0] == userID)), 1]
+        #print(len(movieID_interaccion_1)) # aquelles pelicules q usuari té interaccio
+        # Eliminar las filas de ranked_sorted donde movieID está en movieID_interaccion_1
+        #ranked_sorted = ranked_sorted[~np.isin(ranked_sorted[:, 0], movieID_interaccion_1)]
+        #Filtrar las filas de ranked_sorted donde movieID está en movieID_interaccion_1
+        ranked_sorted1 = [row for row in ranked_sorted1 if row[0] not in movieID_interaccion_1]
+        #print(len(ranked_sorted))
+        return ranked_sorted1[:topk]
