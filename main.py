@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import torch.utils.data
 from preprocessing import Netflix1MDataset
-from train import TrainFmModel
+from train_fm_model import TrainFmModel
 from models import FactorizationMachineModel, RandomModel, PopularityModel
 from utils import Utils
 from test_model import Test
@@ -14,12 +14,14 @@ hyperparams = {
     'lr' : 0.001, 
     'num_items' : 10295
 }
+
 dataset_path = {
     'train_dataset' : 'sample_data/Subset1M_traindata.csv',
     'test_dataset' : 'sample_data/Subset1M_testdata.csv'
 }
 
 def main():
+    #Optional
     #TORCH_version = torch.__version__
     #print(TORCH_version)
     #TORCH = format_pytorch_version(TORCH_version)
@@ -27,7 +29,6 @@ def main():
     #CUDA = format_cuda_version(CUDA_version)
 
     device = torch.device("cuda")
-
 
     #Preprocessing
     full_dataset = Netflix1MDataset(dataset_path, num_negatives_train=4, num_negatives_test=99)
@@ -53,15 +54,6 @@ def main():
 
     #df = pd.DataFrame(full_dataset.test_set)
     #df.to_csv("sample_data/full_dataset_testset.csv", index= False)
-
-def format_pytorch_version(version):
-    return version.split('+')[0]
-
-def format_cuda_version(version):
-    if version is not None:
-        return 'cu' + version.replace('.', '')
-    else:
-        return '' 
     
 ########## FM MODEL ##########
 def run_fm_model(full_dataset,data_loader,device):
@@ -149,5 +141,16 @@ def run_pop_model(full_dataset,data_loader):
     #73 items diferents
     print (len(num_items_recommended)/10295)
 
+#Optional
+def format_pytorch_version(version):
+    return version.split('+')[0]
+
+def format_cuda_version(version):
+    if version is not None:
+        return 'cu' + version.replace('.', '')
+    else:
+        return '' 
+
 if __name__ == "__main__":
     main()
+
