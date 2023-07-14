@@ -1,6 +1,7 @@
 import torch.utils.data
-from utils import FeaturesLinear, FM_operation
+#from utils import FeaturesLinear, FM_operation
 import random
+import numpy as np
 
 class FactorizationMachineModel(torch.nn.Module):
     """
@@ -9,7 +10,6 @@ class FactorizationMachineModel(torch.nn.Module):
     Reference:
         S Rendle, Factorization Machines, 2010.
     """
-
     def __init__(self, field_dims, embed_dim):
         super().__init__()
         #############################
@@ -17,9 +17,9 @@ class FactorizationMachineModel(torch.nn.Module):
         # forward pass, we are building the expression of factorization machines.
         #############################
 
-        self.linear = FeaturesLinear(field_dims,1)
+        self.linear = self.FeaturesLinear(field_dims,1)
         self.embedding = torch.nn.Embedding(field_dims, embedding_dim=embed_dim)
-        self.fm = FM_operation(reduce_sum=True)
+        self.fm = self.FM_operation(reduce_sum=True)
 
         torch.nn.init.xavier_uniform_(self.embedding.weight.data)
 
@@ -36,6 +36,41 @@ class FactorizationMachineModel(torch.nn.Module):
         test_interactions = torch.from_numpy(interactions).to(dtype=torch.long, device=device)
         output_scores = self.forward(test_interactions)
         return output_scores
+
+    # Linear part of the equation
+    class FeaturesLinear(torch.nn.Module):
+
+        def __init__(self, field_dims, output_dim=1):
+            super().__init__()
+
+            self.emb = torch.nn.Embedding(field_dims, output_dim)
+            self.bias = torch.nn.Parameter(torch.zeros((output_dim,)))
+
+        def forward(self, x):
+            """
+            :param x: Long tensor of size ``(batch_size, num_fields)``
+            """
+            # self.fc(x).shape --> [batch_size, num_fields, 1]
+            # torch.sum(self.fc(x), dim=1).shape --> ([batch_size, 1])
+            return torch.sum(self.emb(x), dim=1) + self.bias
+
+    # FM part of the equation
+    class FM_operation(torch.nn.Module):
+
+        def __init__(self, reduce_sum=True):
+            super().__init__()
+            self.reduce_sum = reduce_sum
+
+        def forward(self, x):
+            """
+            :param x: Float tensor of size ``(batch_size, num_fields, embed_dim)``
+            """
+            square_of_sum = torch.sum(x, dim=1) ** 2
+            sum_of_square = torch.sum(x ** 2, dim=1)
+            ix = square_of_sum - sum_of_square
+            if self.reduce_sum:
+                ix = torch.sum(ix, dim=1, keepdim=True)
+            return 0.5 * ix
     
     
 class RandomModel(torch.nn.Module):
@@ -94,7 +129,7 @@ class PopularityModel:
         #com sé si l'usuari ja ha vist alguna de les pelis de la llista?
         return ranked_sorted
 
-    def predict(self, ranked_sorted1, interactions, userID):
+    def predict(self, ranked_sorted1, interactions, userID,topk):
         #if user-item-interaction = 1 descarta'l del ranking
         # Obtener los movieID con interacción igual a 1
         movieID_interaccion_1 = interactions[((interactions[:, 2] == 1) & (interactions[:,0] == userID)), 1]

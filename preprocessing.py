@@ -13,12 +13,12 @@ class Netflix1MDataset(torch.utils.data.Dataset):
     """
     def __init__(self, dataset_path, num_negatives_train=4, num_negatives_test=100, sep=','):
         colnames = ["user_id", 'item_id', 'label', 'timestamp']
-        data = pd.read_csv(f'{dataset_path}_traindata.csv', sep=sep, header=None, names=colnames).to_numpy()
-        test_data = pd.read_csv(f'{dataset_path}_testdata.csv', sep=sep, header=None, names=colnames).to_numpy()
+        train_data = pd.read_csv(f''+dataset_path['train_dataset'], sep=sep, header=None, names=colnames).to_numpy()
+        test_data = pd.read_csv(f''+dataset_path['test_dataset'], sep=sep, header=None, names=colnames).to_numpy()
 
         # TAKE items, targets and test_items
-        self.targets = data[:, 2]
-        self.items = self.preprocess_items(data)
+        self.targets = train_data[:, 2]
+        self.items = self.preprocess_items(train_data)
 
         # Save dimensions of max users and items and build training matrix
         self.field_dims = np.max(self.items, axis=0) + 1 # ([ 7795, 10295+7795])
