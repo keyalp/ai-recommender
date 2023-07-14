@@ -92,7 +92,6 @@ def run_fm_model(full_dataset,data_loader,device):
     print("initial HR: ", hr)
     print("initial NDCG: ", ndcg)
 
-
 ########## RANDOM MODEL ##########
 def run_rand_model(full_dataset,data_loader,device):
     rnd_model = RandomModel(data_loader.dataset.field_dims)
