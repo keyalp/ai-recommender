@@ -140,3 +140,44 @@ class PopularityModel:
         ranked_sorted1 = [row for row in ranked_sorted1 if row[0] not in movieID_interaccion_1]
         #print(len(ranked_sorted))
         return ranked_sorted1[:topk]
+    
+    class PopularityModel: #Traduced
+        def __init__(self, num_items, topk):
+            self.num_items = num_items
+            self.item_popularity = None
+            self.topk = topk
+
+        def forward(self):
+            pass
+
+        def fit(self, interactions):
+            """
+            Fit the popularity model using user interactions.
+            """
+            # Calculate item popularity based on interaction counts
+            movieid_column = interactions[:, 1]
+            rating_column = interactions[:, 2]
+            # Create a boolean mask to identify items with rating equal to 1
+            mask = rating_column == 1
+            # Filter movieids corresponding to items with rating equal to 1
+            rated_movieids = movieid_column[mask]
+            # Get unique items with rating equal to 1
+            unique_rated_movieids, counts = np.unique(rated_movieids, return_counts=True)
+            # Normalize popularity to obtain a probability distribution
+            n_interactions = len(interactions)
+            self.item_popularity = counts / n_interactions
+            ranked_list = []
+            for i in range(len(unique_rated_movieids)):
+                column1 = unique_rated_movieids[i]
+                column2 = self.item_popularity[i]
+                ranked_list.append([column1, column2])
+            ranked_sorted = sorted(ranked_list, key=lambda x: x[1], reverse=True)
+            return ranked_sorted
+
+        def predict(self, ranked_sorted, interactions, userID, topk):
+            # Exclude ranked items if user-item interaction = 1
+            # Get movieIDs with interaction equal to 1
+            movieID_interact_1 = interactions[((interactions[:, 2] == 1) & (interactions[:,0] == userID)), 1]
+            # Remove rows from ranked_sorted where movieID is in movieID_interact_1
+            ranked_sorted = [row for row in ranked_sorted if row[0] not in movieID_interact_1]
+            return ranked_sorted[:topk]
