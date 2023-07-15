@@ -3,7 +3,8 @@ import torch.utils.data
 import scipy.sparse as sp
 import math
 import numpy as np
-    
+import random
+
 class Utils():
     def build_adj_mx(dims, interactions):
         train_mat = sp.dok_matrix((dims, dims), dtype=np.float32)
@@ -46,3 +47,21 @@ class Utils():
         num_items_recommended = len(np.unique(random_recommend_list))
         cov = num_items_recommended / num_items
         return cov
+    
+    def set_seeds() -> None:
+        # Set a seed values
+        seed = 123
+        random.seed(seed)
+        np.random.seed(seed)
+        # Set seed for CPU
+        torch.manual_seed(seed)
+        random.seed(seed)
+        np.random.seed(seed)
+
+        # Set seed for GPU (if available)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+     

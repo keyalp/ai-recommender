@@ -28,7 +28,7 @@ def main():
     #CUDA_version = torch.version.cuda
     #CUDA = format_cuda_version(CUDA_version)
 
-    device = torch.device("cuda")
+    device = torch.device("cuda") #cuda or cpu
 
     #Preprocessing
     full_dataset = Netflix1MDataset(dataset_path, num_negatives_train=4, num_negatives_test=99)
@@ -45,7 +45,7 @@ def main():
         elif model == 3:
             run_pop_model(full_dataset,data_loader)
         elif model == 4:
-            print("Closing Application")
+            print("Closing Application...")
         else:
             print("Wrong option")
         
@@ -151,5 +151,6 @@ def format_cuda_version(version):
         return '' 
 
 if __name__ == "__main__":
+    Utils.set_seeds()
     main()
 

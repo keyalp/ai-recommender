@@ -1,6 +1,7 @@
 Recommendation System
 ===
 
+
 Final Project for the UPC Artificial Intelligence with Deep Learning Postgraduate Course, Spring 2023.
 
 * Authors: [Núria Gonzalez](mailto:nugobo1981@gmail.com), [Jaume Betriu](betriutortjaume@gmail.com), [Miquel Albó](mailto:miquel.albo@estudiantat.upc.edu)
@@ -43,7 +44,6 @@ Final Project for the UPC Artificial Intelligence with Deep Learning Postgraduat
 * [References](#references)
 
  
-
 # Introduction <a name="intro"></a>
 Recommender systems filter information to avoid overload because of the amount of data generated related to users' interests. Retrieval algorithms used in systems such as Google, Altavista, Grouplens or Amazon are some examples of mapping the available content to the preferences of the users based on their observed behavior about an item.
 
