@@ -63,8 +63,8 @@ def run_fm_model(full_dataset,data_loader,device):
     optimizer = torch.optim.Adam(params=model_fm.parameters(), lr=hyperparams['lr'])
     #print (full_dataset.test_set[0])
     
-    train_model_fm = TrainFmModel(model_fm,optimizer,data_loader,criterion,device,hyperparams['topk'])
-    train_model_fm.do_epochs
+    train_model_fm = TrainFmModel(model_fm,optimizer,data_loader,full_dataset,criterion,device,hyperparams['topk'])
+    train_model_fm.do_epochs()
 
     #print(full_dataset.test_set[1])
 
@@ -117,8 +117,8 @@ def run_pop_model(full_dataset,data_loader):
     print (pop_recommend_list[:10])
 
     #print(len(pop_recommend_list[:0]))
-    #usersID = 7795
-    usersID = 100
+    usersID = 7795
+    #usersID = 100
     items_for_all_users = []
 
     for i in tqdm(range(usersID)):

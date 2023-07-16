@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import torch.utils.data
-import scipy.sparse as sp
 from utils import Utils
 
 #Building and preparing dataset
