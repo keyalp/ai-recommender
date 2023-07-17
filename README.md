@@ -7,7 +7,7 @@ Final Project for the UPC Artificial Intelligence with Deep Learning Postgraduat
 * Team Advisor: [Paula Gomez Duran](paulagomezduran@gmail.com)
 * Date: July 2023
 
-## Table of Contents (Provisional)
+## Table of Contents
 
 * [Introduction](#intro)
 * [Overview](#overview)
@@ -26,6 +26,8 @@ Final Project for the UPC Artificial Intelligence with Deep Learning Postgraduat
     * [Intralist (NDCG)](#intralist)
     * [Coverage](#coverage)
 * [CF Models Exploration:: Understanding and Comparison](#explore)
+    * [Random](#random)
+    * [Popularity](#popularity)
     * [Matrix Factorizacion and Factorization Machine Model (FM)](#fm_model)
     * [Graphical Convolutional Network Model (GCN)](#gcn_model)
     * [Bias problems](#bias)
@@ -34,10 +36,10 @@ Final Project for the UPC Artificial Intelligence with Deep Learning Postgraduat
         * [Scalability](#scale)
         * [Non-interpretable results](#nonint)
         * [Data hungry](#datahung)
-    * [Deep Learning Model (DL)](#deep_model)
+    * [Deep Learning Models (DL)](#deep_model)
         * [Our proposal](#dl_model)
 * [Results](#results)
-* [Conclusions](#conclusions)
+* [Conclusions](#conclusion)
 * [References](#references)
 
 
@@ -73,7 +75,6 @@ conda activate recommender_system_final
 ```
 
 
-
 ### 2. Manual Installation
 
 The manual installation consists on:
@@ -89,16 +90,34 @@ The manual installation consists on:
 
 ## Usage
 
+To enhance the user experience and minimize waiting times, the repository is executed in two stages:
+- Data preprocessing
+- Model training
 
-At this point you are now able to run the `main.py`
+The first step will be to create a data folder inside the rpository. The name of the folder **must be 'data'**. Inside the folder the user must place the dataset **movies_samples.csv**.
+
+To run the preprocessing of the data:
+
 ```bash
-python main.py
+python preprocessing_main.py
 ```
 
-TODO
+This will create 5 different csv files in the data folder.
 
+At this point you are now able to train the models. To do so run: 
 
+```bash
+python main.py --model <model_name>
+```
 
+Replace the variable `<model_name>` with the name of the model you want to train and evaluate. This are the available models:
+- `random`
+- `popularity`
+- `deep`
+- `residual`
+- `compact`
+- `fm`
+- `abs_popularity`
 
 # Architectures<a name="architectures_usage" ></a>
 The main purpose of a recommender system (RS) is to predict which item will be clicked next by the user. This is not a guarantee of positive feedback; it just counts what the user probably will click.
@@ -163,7 +182,7 @@ So finally we obtained a dataset with 1.154.533 rows, with 7795 users and 10295 
 
 
 ## Negative sampling <a name="data_neg"></a>
-The dataset register each user-item interaction considering it as positive so we have no non-interaction log, so it's necessary "manually" generate negative sampling (user-movie noninteraction). This part of preprocessing is applied after the splitting:
+After the dataset records each user-item interaction as positive, there are no logs indicating non-interactions. Therefore, it becomes necessary to "manually" generate negative sampling, specifically for user-movie non-interactions. This preprocessing step is performed subsequent to the splitting process:
 - Regarding to train data the negative sampling is adding 4 negative samples for 1 positive in interaction list.
 ![](https://hackmd.io/_uploads/B13ZpoRYn.png =200x200)
 - Regarding to test data the negative sampling is adding 99 negative samples for 1 that we know it's real because it has been extracted from the original dataset. 
@@ -181,19 +200,40 @@ As we can see in the recommender list, the item 14966 is between the 10 first po
 ## Intralist (NDCG) <a name="intralist"></a>
 We can check how relevant the list of recommended items are, Normalized Discounted Cumulative Gain (NDCG) is a type of intralist metrics. NDCG measures the "quality" of the ranking, we assign a gain to each element of the list for example using the feedback of users (rating less than 3 gain is 0, over is 1). The items at the top of the list accumulate a higher gain than the bottom positions because of distribution of probabilities. 
 ![](https://hackmd.io/_uploads/S1ZP8AAFh.png)
-For example, in the case of user 1 (up), the NDGC was 0.1183, because the item clicked was in the seventh position of ten when it should have been in the three first.
+For instance, consider the case of user 1 (up), where the NDCG score was 0.1183. This score indicates that the item they clicked was initially ranked seventh out of ten positions, while it should have been ranked among the top three positions.
 
 ## Coverage<a name="coverage"></a>
-This measure evaluates the breadth of recommendations provided to determine the diversity and ability of the system to recommend items that span a wide range of user preferences.
+This measure assesses the breadth of recommendations given, gauging the system's capability to suggest items that cover a broad spectrum of user preferences, thus evaluating both diversity and the system's ability.
 
 Coverage is the proportion of unique items over the total dataset that have been recommended by the system. A higher coverage indicates a greater variety of recommended items and increases the likelihood of discovering new or less known options.
 
-The coverage metric is calculated by dividing the number of unique items recommended by the system by the total number of unique items in the dataset. A high coverage value indicates that the system is recommending a wide range of items. If a system has low coverage, it could mean that it focuses too much on a subset of popular items and does not consider the diversity of user preferences.
+The coverage metric is determined by the ratio of unique items recommended by the system to the total number of unique items in the dataset. A higher coverage value suggests a broader range of recommended items. Conversely, lower coverage may imply a system that prioritizes a subset of popular items, neglecting the diversity of user preferences.
 
 
 <!--![](https://hackmd.io/_uploads/BJHj6sAth.png)-->
 
-# CF Models Exploration:: Understanding and Comparison <a name=""></a>
+# CF Models Exploration: Understanding and Comparison <a name=""></a>
+
+## Random model:
+The random model suggests 10 movies randomly to the user. Considering its nature, we anticipate poor performance from this model. Indeed, the results are as follows:
+
+| Hit ratio 10 | NDCG     | Coverage |
+| ------------ | -------- | -------- |
+| 0.1001       | 0.0451     | 100%     |
+
+
+## Popularity models:
+We have implemented two different popularity models. The absolute popularity model returns the top 10 most popular movies in the whole dataset. If we run this model we obtain the metrics:
+
+| Hit ratio 10 | NDCG | Coverage |
+| -------- | -------- | -------- |
+| 0.015     | 0.007     | 0.09% |
+
+On the other hand, if we recommend the top 10 most popular movies from the list of possible recommendations to each user the metrics are as follows:
+
+| Hit ratio 10 | NDCG | Coverage |
+| -------- | -------- | -------- |
+| 0.59     | 0.31     |   19%   |
 
 ## Matrix Factorizacion and Factorization Machine Model (FM)<a name=""></a>
 Matrix factorization (MF) is a technique that consists in decompose a matrix in two smaller arrays. 
@@ -201,56 +241,64 @@ With this operation the system learns about the preferences of user and the feat
 The next figure explain this process, it has been extrated from [T1].
 ![](https://hackmd.io/_uploads/Syvxp1kqh.png)
 Simple and effective but only works with explicit data and it's not possible to add extra features as CBF.
-In our dataset we use positive and negative sampling, the behaviour of a user is modelled implicitly. We need another more general model framework that can deal with the drawbacks of MF, called <b>Factorization Machines</b>. The next figure explain this process, it has been extrated from [T1].
+In our dataset we use positive and negative sampling, the behaviour of a user is modelled implicitly. We need another more general model framework that can deal with the drawbacks of MF, called <b>Factorization Machines</b>. The next figure explain this process, it has been extracted from [T1].
 ![](https://hackmd.io/_uploads/ByPs4xk93.png)
 <b>Factorization Machines (FM)</b> is an extension of Matrix Factorization that allows capturing higher order interactions between variables in a machine learning model. Unlike Matrix Factorization, Factorization Machines are capable of modeling non-linear interactions between features using factorization techniques.
 Instead of working directly with latent factor matrices, they use feature combinations to represent higher-order interactions. These combinations are generated by factoring the cross products of the original features. The next equation has been implemented:
 ![](https://hackmd.io/_uploads/SylOweyqn.png)
-FM can capture both order 2 interactions (interactions between pairs of features) and higher order interactions (interactions between sets of features). This allows modeling more complex and non-linear relationships between variables. 
+FM can capture interactions at both order 2, which refers to interactions between pairs of features, and higher orders, which encompass interactions between sets of features. This capability enables the modeling of intricate and non-linear relationships between variables, thereby accommodating more complex patterns in the data.
+Here we can see the results obtained in our FM model:
 
+| Hit ratio 10 | NDCG | Coverage |
+| -------- | -------- | -------- |
+| 0.3374     | 0.1713   | 45,81% |
 
 ## Graph Convolutional Network Model (GCN)<a name=""></a>
 
 As the structures become more complex, another approach can be used in combination with FM that it's called Graph Convolutional Networks (GCN). GCN are more beneficial when working in some of the following scenarios:
 - Graph structure: In many cases, recommender systems may have additional information in the form of a graph that represents relationships between users, items, or other entities. For example, there may be social connections between users or similarity relationships between items. GCNs are designed to take advantage of this structure of the graph and capture richer and more contextually significant patterns and relationships.
-- Contextual information: GCNs can help integrate additional contextual information into the recommendation process. They can consider contextual features such as time, location, or any other type of relevant information to improve recommendations. This ability to capture contextual information can be useful in scenarios where preferences and recommendations may vary based on context.
+- Contextual information: GCNs can help to integrate additional contextual information into the recommendation process. GCNs can consider contextual features such as time, location, or any other type of relevant information to improve recommendations. This ability to capture contextual information can be useful in scenarios where preferences and recommendations may vary based on context.
 - Generalization to new items or users: FMs may face difficulties in generalizing to new items or users that are not present in the training data set. Instead, GCNs can take advantage of the existing graph structure and relationships to make inferences and offer recommendations even for items or users without historical data (solving cold start problem).
 
-Here is an example of how a GCN is working, the red node is our RS model and the yellow ones and blue nodes are users and items respectively. This image has been extracted from this <a href="https://datascienceub.medium.com/2-3-recommendation-gcn-for-rs-397e98f37050">source</a>.
+An illustration showcasing the functioning of a Graph Convolutional Network (GCN) is presented here. In the image, the RS model is depicted as a red node, while the yellow and blue nodes represent users and items, respectively. 
+> This image has been extracted from this <a href="https://datascienceub.medium.com/2-3-recommendation-gcn-for-rs-397e98f37050">source</a>.
 ![](https://hackmd.io/_uploads/Hy0uplgq3.png)
-You can observe the yellow nodes and blue nodes store relation between themselves creating complex structures and patterns that GCN can solve easily.
 
-When implementing we only have to replace a line of the code, instead of embedding layer we add gcn. However in our case the results are not significant because the sparsity of data.
+You can observe that the yellow nodes and blue nodes stores relations between themselves creating complex structures and patterns that GCN can solve easily.
 
-# Bias Problems <a name="bias"></a>
-Up to now we have seen the next problems. 
-- <b>Cold start: </b><a name="cold_start"></a>
-There are three categories of cold-start:
-1. During the start-up of a recommender almost the users have no interacted with the list items, so there are no history to compare. 
-2&3.The same situation occurs when a new item is added or when a new user registers into the system, there are no interactions. 
-Due to the high number of investigations have been developed many strategies to mitigate this effect. 
-A common strategy when dealing with new items is to couple a collaborative filtering recommender, for warm items, with a content-based filtering recommender, for cold-items. This approach is to rely on hybrid recommenders (HR). Hybrid models can combine CBF and CF or switch between them depending on the needings.
-Another option is ask to user for explicit data and another strategy ethically questionable is integrating information from other user activities, such as browsing histories or social media platforms.
-When new user or item added, as we have seen GCN can solve this task.
+During the implementation process, making a simple modification is sufficient. Instead of using an embedding layer, we replace it with a GCN layer. However, in our specific scenario, the outcomes do not yield significant results due to the sparse nature of the data. As a result, these outcomes have been excluded from consideration.
+
+## Bias Problems <a name="bias"></a>
+After exploring the models above we have detected the following problems: 
+
+-  **Cold start:** <a name="cold_start"></a>
+There are two categories of cold-start:
+    1. During the start-up of a recommender, the users have not interacted yet with the listed items, so there are no history to compare. 
+    2. The same situation occurs when a new item is added or when a new user sings up into the system, there are no interactions. 
+Due to the high number of investigations that have been developed, there are a lot of strategies to mitigate this effect. 
+A common strategy when dealing with new items is to combine a collaborative filtering recommender for warm items with a content-based filtering recommender for cold items. This approach is to rely on hybrid recommenders (HR). Hybrid models can combine CBF and CF or switch between them depending on the needings.
+Another option is ask to the user for explicit data and another strategy ethically questionable is integrating information from other user activities, such as browsing histories or social media platforms.
+When new user or item is added, as we have seen, GCN can solve this task.
 
 - <b>Filter bubbles: </b><a name="fil_bub"></a>
-It refers to the situation in which users of a recommender system are trapped in an information bubble, receiving recommendations that closely align with their preferences and limiting their exposure to diverse perspectives and content.
+It pertains to a scenario where users of a recommender system find themselves confined within an information bubble. This occurs when they predominantly receive recommendations that closely match their preferences, which consequently restricts their exposure to a diverse range of perspectives and content.
 Two major approaches are commonly used: 
-a)Incorporation of contextual information: In addition to a user's preferences, recommender systems can use additional contextual information, such as geographic location, time, current trends, or overall popularity, to broaden the diversity of recommendations. This allows you to consider the context in which the recommendation is made and offer more varied options.
-b)Explicit user feedback: Recommender systems can provide users with the option to express their preferences beyond implicit interactions. By allowing users to provide explicit feedback, such as ratings, comments, or preference specifications, you can improve personalization and reduce the undue influence of the preference bubble.
+    1. Incorporation of contextual information: In addition to a user's preferences, recommender systems can use additional contextual information, such as geographic location, time, current trends, or overall popularity, to broaden the diversity of recommendations. This allows you to consider the context in which the recommendation is made and offer more varied options.
+    2. Explicit user feedback: Recommender systems can provide users with the option to express their preferences beyond implicit interactions. By allowing users to provide explicit feedback, such as ratings, comments, or preference specifications, you can improve personalization and reduce the undue influence of the preference bubble.
 - <b>Scalability: </b><a name="scale"></a>
 Scalability problems are common in recommender systems, especially when large volumes of data are handled and complex calculations must be performed in real time.
-To address these scalability issues, various techniques and approaches are used, such as the use of efficient algorithms and data structures, the distribution and parallelization of computations, the use of scalable data storage and retrieval systems, and the use of data architectures. distributed processing.
+To address these scalability issues, various techniques and approaches are used, such as the use of efficient algorithms and data structures, the distribution and parallelization of computations, the use of scalable data storage and retrieval systems, and the use of data architectures.
 - <b>Non-interpretable results: </b><a name="nonint"></a>
 Interpretation of results in recommender systems can be difficult due to opaque algorithms, incomplete or noisy data, changing user preferences, subjective interpretation, and lack of full context. 
-Applying an attention mechanism to the recommender system can help filter out uninformative content and choose the most representative items. It provides good interpretability at the same time.
+By applying an attention mechanism to the recommender system, it becomes possible to filter out uninformative content and select the most representative items. This approach not only enhances interpretability but also ensures that the chosen items are highly relevant.
 
 - <b>Data hungry: </b><a name="datahung"></a>
-Recommender systems based on machine learning algorithms often need a sufficiently large and diverse data set to capture user preferences and behaviors. This is because these algorithms look for hidden patterns and relationships in the data to generate effective recommendations.
+Recommender systems based on machine learning algorithms, often need a sufficiently large and diverse data set to capture user preferences and behaviors. This is because these algorithms look for hidden patterns and relationships in the data to generate effective recommendations, more data more accurate embeddings but in the other hand more computational cost.
+
+The model known as the *Deeper Model* operates on deeper layers within these systems, surpassing traditional ones by virtue of its enhanced processing capabilities. These models can be customized for specific tasks, effectively handling non-linear data by incorporating multiple approaches into a single system. Despite the limited data availability, we anticipate that the focus will be primarily on improving accuracy.
 
 
 ## Deep Models (DL)<a name="deep_models"></a>
-Deep learning-based recommender systems outperform traditional ones due to their capability to process. DL techniques could be tailored for specific tasks non-linear data combining many approaches in the same system. 
 
 These deeper models have an architecture with multiple hidden layers, allowing them to learn more sophisticated features and patterns:
 
@@ -264,15 +312,15 @@ These deeper models have an architecture with multiple hidden layers, allowing t
 
 - Greater generalizability: Deeper models typically have greater generalizability, allowing them to better adapt to new or previously unseen data. Through multiple layers, these models can learn richer and more flexible representations, allowing them to better generalize to different scenarios and test cases.
 
-## Our proposal
+## Proposed deep architectures
 To fully explore the capabilities of deeper models, we introduce three distinct network architectures designed by us.
 
-### Deep model
+### Deep model:
 
 
 ![](https://hackmd.io/_uploads/S1-dJEW92.png)
 
-As observed, the model comprises two embedding layers that receive input and are subsequently concatenated before being fed into a series of fully connected layers. The network outputs the probability of match between the user and the movie.
+As noted, the model consists of two embedding layers that receive input and are then concatenated. This concatenated representation is further passed through a sequence of fully connected layers. The resulting output of the network represents the probability of a match between the user and the movie.
 
 Setting the following hyperparameters
 - **batch size:** 500000
@@ -284,26 +332,101 @@ Setting the following hyperparameters
 and training we obtain:
 ![](https://hackmd.io/_uploads/BJa1VE-c3.png)
 
-We can see that the model begins to overfit around the 25 so doing an early stoppage we get the following test metrics:
+We can see that the model begins to overfit around the 25th batch so by doing an early stoppage we get the following test metrics:
 
-| Hit ratio 10 | NDCG |
-| -------- | -------- |
-|  0.68  | 0.61     |
+| Hit ratio 10 | NDCG     | Coverage |
+| --------     | -------- | -------- |
+|  0.68        | 0.61     | 50%
 
-### Residual model
+### Residual model:
 
 ![](https://hackmd.io/_uploads/SJQeD4-ch.png)
 
-In this case the model proposed has wider 
+In this case the model proposed has wider layers and a much considers a skip connection in the first layer of the fully connected block. 
+
+Setting the following hyperparameters
+- **batch size:** 500000
+- **number of epochs:** 10
+- **learning rate:** 0.05
+- **embeding dimension for users:** 40
+- **embeding dimension for movies:** 39
+
+and training we obtain:
+![](https://hackmd.io/_uploads/BJ8afBbch.png)
+
+We can see that the model overfits faster than the previous one. In this case from the 18th batch. By doing an early stopagge we obtain the following test metrics:
+
+| Hit ratio 10 | NDCG   | Coverage |
+| -----------  | -------| -------- |
+|  0.52        | 0.30   | 90%      |
 
 
+### Compact model:
 
-# Results<a name="results"></a>
-// grafiques... taula amb dades de hr, ndcg i coverage de cada model
-// problemes destacables, falta de dades, falta de diversitat de dades, cost computacions quan s'ha intentat escalar la dataset
+![](https://hackmd.io/_uploads/SyjQNSW9n.png)
 
-# Conclusions <a name=""></a>
-// es una p merda de sistema q dependra del permis de lusuari donar les seves dades per realitzar comparacio. S'hauran de trobar altres maneres per treballar amb CBF i no amb CF... Ara amb la nova llei d'ètica hi haurà problemes... a europa funciona diferent q a Xina Usa etc... 
+The compact model is the simplest of the three architectures. This model eliminates the two fully connected layers that we had after the embedings in the deep model.
+
+Setting the following hyperparameters
+- **batch size:** 500000
+- **number of epochs:** 3
+- **learning rate:** 0.01
+- **embeding dimension for users:** 20
+- **embeding dimension for movies:** 20
+
+and training we obtain:
+![](https://hackmd.io/_uploads/SkZiFBZ52.png)
+
+| Hit ratio 10 | NDCG     | Coverage |
+| ----------   | -------- | -------- |
+|  0.55        | 0.27     | 24%      |
+
+
+# Results<a name="results"></a> 
+
+|Model             | Hit ratio 10 | NDCG     | Coverage (%) |
+|---------------   | ------------ | -------- | -----------  |
+|Random            | 0.10         | 0.05     | 100%         |
+|ABS Popularity    | 0.02         | 0.01     | 0.09%        |
+|Popularity        | 0.59         | 0.31     | 19%          |
+|Factorization M   | 0.34         | 0.17     | 46%          |
+|Deeper            | 0.68         | 0.61     | 50%          |
+|Residual          | 0.52         | 0.30     | 90%          | 
+|Compact           | 0.55         | 0.27     | 24%          |
+
+In the provided table, we observe that both the Hit Ratio (HR) metrics and NDCG values are similar for the random and ABS popularity models. Upon examining the user_test and recommendation list, it becomes apparent that approximately 65% of the movie_ids are greater than 10,000. Typically, an NDCG value close to 1 indicates highly relevant and well-ordered recommendations, while a value close to 0 suggests less relevant or disorganized recommendations. In other words, the recommender system is providing recommendations with a low likelihood of being useful or interesting to users, resulting in a low HR compared to other models.
+
+When utilizing the second versions of the popularity model, the smaller setlist size increases the probability of a match, as observed. However, considering the coverage metric reveals a significantly worse result because our system only encompasses a small fraction of the entire available item base. Over time, this limited coverage can lead to a decrease in the quality of recommendations, contributing to the problem of the filter bubble.
+
+Initially, when employing more advanced data analysis techniques such as the factorization machine model, notable improvements are observed. This is reflected in a HR of 33% and an increased NDCG score, indicating a reduction in the filter bubble issue.
+
+Furthermore, when utilizing deep analysis models, a significant qualitative leap is witnessed. The HR increases to 68%, and the NDCG reaches 61%. All three models (Deeper, Residual, and Compact) exhibit high accuracy. However, the NDCG metric suggests that the residual and compact versions might face challenges related to the diversity of recommended items compared to the Deeper model, as their NDCG values decrease.
+
+
+# Conclusions <a name="conclusion"></a>
+
+Random and popularity recommendation systems:
+
+- These systems are simple and easy to implement.
+- They provide recommendations without considering user preferences.
+- They tend to have low quality in terms of recommendation relevance.
+- They do not consider personalization or diversity in recommendations.
+
+Factorization Machine model:
+
+- Introduces more advanced data analysis techniques.
+- Improves the quality of recommendations compared to random and popularity systems.
+- Enables the incorporation of user and item preferences and characteristics into the analysis.
+- Increases the level of personalization and can provide more relevant recommendations.
+
+Deep learning models:
+
+- Represent a significant qualitative leap in terms of performance.
+- Achieve a significant increase in hit rate (HR) and recommendation quality (NDCG).
+- Enables learning more complex features and patterns from the data.
+- They may encounter diversity issues in recommendations, especially in the residual and compact versions.
+
+As we transition from random and popularity-based systems to advanced models like Factorization Machine and Deep Learning, we notice enhancements in recommendation quality and personalization. Nonetheless, it's important to be mindful of potential diversity issues that can arise in these sophisticated models. The selection of a recommendation system should consider the project's specific goals, requirements, and available resources.
 
 
 # References
